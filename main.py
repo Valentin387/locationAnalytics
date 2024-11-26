@@ -5,6 +5,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 from urllib.parse import quote_plus
+from data.VehiculoPlusLocation import VehiculoPlusLocation
 
 # Load environment variables
 load_dotenv()
@@ -32,15 +33,37 @@ collection = db['locations']
 try:
     client.admin.command('ping')
     print("Pinged your deployment. You successfully connected to MongoDB!")
+    print("\n ************************************************** \n\n")
 except Exception as e:
     print(e)
 
-start_date = datetime(2024, 11, 22, 17, 0, 0) # 2024-11-22 5:0:0 pm
+start_date = datetime(2024, 11, 24, 17, 0, 0) # 2024-11-22 5:0:0 pm
 end_date = datetime(2024, 11, 25, 8, 0, 0)
 
 query = {"timeStamp": {"$gte": start_date, "$lte": end_date}}
 results = collection.find(query)
 
+# List to hold the LocationData objects
+location_data_list : list[VehiculoPlusLocation] = []
+
+# Convert each MongoDB document into a VehiculoPlusLocation object and append to the list
+for document in results:
+    # Convert the ObjectId fields to strings manually
+    document['_id'] = str(document['_id'])
+    if 'usuario' in document:
+        document['usuario'] = str(document['usuario'])
+
+    # Convert MongoDB document to VehiculoPlusLocation object
+    location_data = VehiculoPlusLocation(**document)
+    location_data_list.append(location_data)
+
+# Print the results
+for location_data in location_data_list:
+    print(location_data)
+
+print("The size of the list is: ", len(location_data_list))
+
+print("\n ************************************************** \n\n")
 print("END OF LINE")
 
 
