@@ -107,6 +107,30 @@ def graph_time_vs_battery(placa: str, data: list[dict], start_date: datetime, en
     plt.tight_layout()
     plt.show()
 
+
+def get_oldest_and_newest_reports(placa: str, data: list[dict], start_date: datetime, end_date: datetime):
+    filtered_data = [entry for entry in data if entry.vehiculo.placa == placa]
+    filtered_data.sort(key=lambda x: x.timeStamp)
+    oldest_report = filtered_data[0].timeStamp
+    newest_report = filtered_data[-1].timeStamp
+
+    # Convert timeStamp to datetime for display if needed
+    # (You can use datetime parsing if your time format is a string)
+
+    # Define a format for display (e.g., "Nov 25, 2024, 3:30 PM")
+    formatted_start = start_date.strftime("%A, %b %d, %Y, %I:%M %p")
+    formatted_end = end_date.strftime("%b %d, %Y, %I:%M %p")
+    formatted_oldest = oldest_report.strftime("%b %d, %Y, %I:%M %p")
+    formatted_newest = newest_report.strftime("%b %d, %Y, %I:%M %p")
+
+    print(f"Oldest report for {placa} from {formatted_start} to {formatted_end}:")
+    print(formatted_oldest)
+
+    print(f"Newest report for {placa} from {formatted_start} to {formatted_end}:")
+    print(formatted_newest)
+
+    # Add more analysis functions as needed
+
 def main():
     double_newline()
     print("\t\t WELCOME, connecting to the database, please wait ... \n")
@@ -191,6 +215,8 @@ def main():
                 option = int(input("Enter option number: "))
                 if option == 1:
                     graph_time_vs_battery(selected_placa, location_data_list, start_date, end_date)
+                elif option == 9:
+                    get_oldest_and_newest_reports(selected_placa, location_data_list, start_date, end_date)
                 elif option == 99:
                     print("Returning to vehicle selection menu ...")
                     break  # Break the options menu loop
@@ -210,7 +236,7 @@ def main():
     double_newline()
     # Close the connection
     print("Closing the connection to the database ...")
-    client.close()
+    client.close() #idk what is this
     print("END OF LINE")
 
 
