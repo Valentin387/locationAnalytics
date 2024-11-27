@@ -3,6 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 from typing import Optional
 from bson import ObjectId
+from .Vehiculo import Vehiculo
 
 # Define ObjectId as a valid type for Pydantic to handle
 class ObjectIdField(str):
@@ -18,7 +19,7 @@ class ObjectIdField(str):
 
 class VehiculoPlusLocation(BaseModel):
     id: ObjectIdField = Field(..., alias="_id")
-    vehiculo: dict
+    vehiculo: Vehiculo
     latitud: float
     longitud: float
     timeStamp: datetime
