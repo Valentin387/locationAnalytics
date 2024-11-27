@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import os
 from urllib.parse import quote_plus
 from data.VehiculoPlusLocation import VehiculoPlusLocation
+import matplotlib.pyplot as plt
 
 # Load environment variables
 load_dotenv()
@@ -69,8 +70,30 @@ def get_user_selection(placas: list[str]) -> str:
 def show_menu():
     print("\nSelect an option:")
     print("1. Graph time vs batteryPercentage")
-    print("EXIT. Exit the program")
+    print("99. EXIT. Exit the program")
+
+    double_newline()
     # Add more options as needed
+
+    # Graph time vs batteryPercentage for a selected vehicle
+def graph_time_vs_battery(placa: str, data: list[dict]):
+    filtered_data = [entry for entry in data if entry.vehiculo.placa == placa]
+    times = [entry.timeStamp for entry in filtered_data]
+    battery_percentages = [entry.batteryPercentage for entry in filtered_data]
+
+    # Convert timeStamp to datetime for plotting if needed
+    # (You can use datetime parsing if your time format is a string)
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(times, battery_percentages, marker='o', color='b', label='Battery %')
+    plt.title(f'Time vs Battery Percentage for {placa}')
+    plt.xlabel('Time')
+    plt.ylabel('Battery Percentage')
+    plt.xticks(rotation=45)
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
 
 def main():
     double_newline()
@@ -95,9 +118,12 @@ def main():
     formatted_start = start_date.strftime("%b %d, %Y, %I:%M %p")
     formatted_end = end_date.strftime("%b %d, %Y, %I:%M %p")
 
+    print("The selected date range is: \n")
+
     # Print the formatted dates
     print(f"Start Date: {formatted_start}")
     print(f"End Date: {formatted_end}")
+    print("\nThe system will find all the vehicles that were active during this time period.")
     double_newline()
 
     print("\t\t Computing results, please wait ... \n\n")
@@ -148,6 +174,8 @@ def main():
         option = int(input("Enter option number: "))
         if option == 1:
             graph_time_vs_battery(selected_placa, location_data_list)
+        elif option == 99:
+            print("Exiting the program ...")
         else:
             print("Option not implemented yet.")
     except ValueError:
@@ -157,6 +185,7 @@ def main():
     #######################################################################################
     double_newline()
     # Close the connection
+    print("Closing the connection to the database ...")
     client.close()
     print("END OF LINE")
 
