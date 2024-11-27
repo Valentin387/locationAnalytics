@@ -25,9 +25,11 @@ def ping_database(client: MongoClient)-> bool:
         client.admin.command('ping')
         print("Pinged your deployment. You successfully connected to MongoDB!")
         print("\n ************************************************** \n\n")
+        return True
     except Exception as e:
         print(f"Failed to connect to the database: {e}")
         print(e)
+        return False
 
 def create_date_range_query(start_date: datetime, end_date: datetime)-> dict:
     # Create a query to find documents between the start and end dates
@@ -35,15 +37,16 @@ def create_date_range_query(start_date: datetime, end_date: datetime)-> dict:
     return query
 
 
-if __name__ == "__main__":
-    print("\n ************************************************** \n\n")
-    print("WELCOME, computing results, please wait ... \n\n")
+def main():
+    print("\n\t********************************************************\n")
+    print("\t\t WELCOME, computing results, please wait ... \n\n")
 
     # Create a new client and connect to the server
     client = MongoClient(uri, server_api=ServerApi('1'))
 
     # Ping the database
-    ping_database(client)
+    if not ping_database(client):
+        return  # Exit if the database cannot be reached
 
     # Access the database (already specified in the connection URI)
     db = client[db_name]
@@ -54,7 +57,7 @@ if __name__ == "__main__":
     start_date = datetime(2024, 11, 26, 21, 0, 0) # 2024-11-22 5:0:0 pm
     end_date = datetime(2024, 11, 26, 21, 30, 0)
 
-        # Create the query
+    # Create the query
     query = create_date_range_query(start_date, end_date)
 
     results = collection.find(query)
@@ -78,3 +81,5 @@ if __name__ == "__main__":
     print("END OF LINE")
 
 
+if __name__ == "__main__":
+    main()
