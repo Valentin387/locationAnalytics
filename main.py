@@ -70,6 +70,13 @@ def get_user_selection(placas: list[str]) -> str:
 def show_menu():
     print("\nSelect an option:")
     print("1. Graph time vs batteryPercentage")
+    print("2. Graph time vs speed")
+    print("3. Graph time vs locationAccuracy")
+    print("4. Graph time vs speed and batteryPercentage")
+    print("5. Graph time vs speed and locationAccuracy")
+    print("6. Graph time vs batteryPercentage and locationAccuracy")
+    print("7. Graph time vs speed, batteryPercentage, and locationAccuracy")
+    print("9. Find the oldest and newest location reports")
     print("99. EXIT. Exit the program")
 
     double_newline()
