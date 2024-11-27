@@ -85,6 +85,7 @@ def show_menu():
     # Graph time vs batteryPercentage for a selected vehicle
 def graph_time_vs_battery(placa: str, data: list[dict], start_date: datetime, end_date: datetime):
     filtered_data = [entry for entry in data if entry.vehiculo.placa == placa]
+    filtered_data.sort(key=lambda x: x.timeStamp)
     times = [entry.timeStamp for entry in filtered_data]
     battery_percentages = [entry.batteryPercentage for entry in filtered_data]
 
