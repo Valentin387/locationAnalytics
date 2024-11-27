@@ -83,7 +83,7 @@ def show_menu():
     # Add more options as needed
 
     # Graph time vs batteryPercentage for a selected vehicle
-def graph_time_vs_battery(placa: str, data: list[dict]):
+def graph_time_vs_battery(placa: str, data: list[dict], start_date: datetime, end_date: datetime):
     filtered_data = [entry for entry in data if entry.vehiculo.placa == placa]
     times = [entry.timeStamp for entry in filtered_data]
     battery_percentages = [entry.batteryPercentage for entry in filtered_data]
@@ -91,9 +91,13 @@ def graph_time_vs_battery(placa: str, data: list[dict]):
     # Convert timeStamp to datetime for plotting if needed
     # (You can use datetime parsing if your time format is a string)
 
+    # Define a format for display (e.g., "Nov 25, 2024, 3:30 PM")
+    formatted_start = start_date.strftime("%b %d, %Y, %I:%M %p")
+    formatted_end = end_date.strftime("%b %d, %Y, %I:%M %p")
+
     plt.figure(figsize=(10, 6))
     plt.plot(times, battery_percentages, marker='o', color='b', label='Battery %')
-    plt.title(f'Time vs Battery Percentage for {placa}')
+    plt.title(f'Time vs Battery Percentage for {placa} from {formatted_start} to {formatted_end}' )
     plt.xlabel('Time')
     plt.ylabel('Battery Percentage')
     plt.xticks(rotation=45)
@@ -180,7 +184,7 @@ def main():
     try:
         option = int(input("Enter option number: "))
         if option == 1:
-            graph_time_vs_battery(selected_placa, location_data_list)
+            graph_time_vs_battery(selected_placa, location_data_list, start_date, end_date)
         elif option == 99:
             print("Exiting the program ...")
         else:
