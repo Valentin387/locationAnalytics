@@ -1,6 +1,7 @@
 
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+from collections import Counter
 from datetime import datetime
 from dotenv import load_dotenv
 import os
@@ -19,12 +20,16 @@ encoded_password = quote_plus(db_password)
 
 uri = f"mongodb+srv://{db_user}:{encoded_password}@{db_server}/{db_name}?retryWrites=true&w=majority&appName=Cluster0"
 
+def double_newline():
+    print("\n\t********************************************************")
+    print("\n")
+
 def ping_database(client: MongoClient)-> bool:
     # Send a ping to confirm a successful connection
     try:
         client.admin.command('ping')
         print("Pinged your deployment. You successfully connected to MongoDB!")
-        print("\n ************************************************** \n\n")
+        double_newline()
         return True
     except Exception as e:
         print(f"Failed to connect to the database: {e}")
@@ -36,10 +41,14 @@ def create_date_range_query(start_date: datetime, end_date: datetime)-> dict:
     query = {"timeStamp": {"$gte": start_date, "$lte": end_date}}
     return query
 
+def print_results(location_data_list: list[VehiculoPlusLocation]):
+    # Print the results
+    for location_data in location_data_list:
+        print(location_data)
 
 def main():
-    print("\n\t********************************************************\n")
-    print("\t\t WELCOME, computing results, please wait ... \n\n")
+    double_newline()
+    print("\t\t WELCOME, connectiong to the database, please wait ... \n")
 
     # Create a new client and connect to the server
     client = MongoClient(uri, server_api=ServerApi('1'))
@@ -54,8 +63,19 @@ def main():
     # Access the collection
     collection = db['locations']
 
-    start_date = datetime(2024, 11, 26, 21, 0, 0) # 2024-11-22 5:0:0 pm
-    end_date = datetime(2024, 11, 26, 21, 30, 0)
+    start_date = datetime(2024, 11, 22, 17, 30, 0) # 2024-11-22 5:0:0 pm
+    end_date = datetime(2024, 11, 25, 8, 30, 0)
+    # Define a format for display (e.g., "Nov 25, 2024, 3:30 PM")
+    formatted_start = start_date.strftime("%b %d, %Y, %I:%M %p")
+    formatted_end = end_date.strftime("%b %d, %Y, %I:%M %p")
+
+    # Print the formatted dates
+    print(f"Start Date: {formatted_start}")
+    print(f"End Date: {formatted_end}")
+    double_newline()
+
+    print("\t\t Computing results, please wait ... \n\n")
+
 
     # Create the query
     query = create_date_range_query(start_date, end_date)
@@ -72,12 +92,23 @@ def main():
         location_data_list.append(location_data)
 
     # Print the results
-    for location_data in location_data_list:
-        print(location_data)
+    #print_results(location_data_list)
 
     print("The size of the list is: ", len(location_data_list))
 
-    print("\n ************************************************** \n\n")
+    double_newline()
+    print("Counting the number of times each vehicle appears in the data ... \n")
+
+    # Sort location data by vehiculo.placa
+    placa_counts  = Counter([location_data.vehiculo.placa for location_data in location_data_list])
+
+    # Display results
+    for placa, count in placa_counts.most_common():
+        print(f"Placa: {placa}, Count: {count}")
+
+    double_newline()
+    # Close the connection
+    client.close()
     print("END OF LINE")
 
 
