@@ -46,9 +46,35 @@ def print_results(location_data_list: list[VehiculoPlusLocation]):
     for location_data in location_data_list:
         print(location_data)
 
+# Display available placas with an integer identifier
+def display_placas(placas: list[str]):
+    print("Choose a vehicle to analyze:")
+    for index, placa in enumerate(placas, 1):
+        print(f"{index}. {placa}")
+
+# Safely get user input for vehicle selection
+def get_user_selection(placas: list[str]) -> str:
+    print("")
+    while True:
+        try:
+            choice = int(input("Enter the number corresponding to the vehicle: "))
+            if 1 <= choice <= len(placas):
+                return placas[choice - 1]
+            else:
+                print("Invalid number. Please choose a valid option.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+# Show the menu with analysis options
+def show_menu():
+    print("\nSelect an option:")
+    print("1. Graph time vs batteryPercentage")
+    print("EXIT. Exit the program")
+    # Add more options as needed
+
 def main():
     double_newline()
-    print("\t\t WELCOME, connectiong to the database, please wait ... \n")
+    print("\t\t WELCOME, connecting to the database, please wait ... \n")
 
     # Create a new client and connect to the server
     client = MongoClient(uri, server_api=ServerApi('1'))
@@ -106,6 +132,29 @@ def main():
     for placa, count in placa_counts.most_common():
         print(f"Placa: {placa}, Count: {count}")
 
+    double_newline()
+    placa_list = list(placa_counts.keys())
+
+    display_placas(placa_list)
+
+    double_newline()
+
+    # Get the user's selection
+    selected_placa = get_user_selection(placa_list)
+
+    show_menu()
+
+    try:
+        option = int(input("Enter option number: "))
+        if option == 1:
+            graph_time_vs_battery(selected_placa, location_data_list)
+        else:
+            print("Option not implemented yet.")
+    except ValueError:
+        print("Invalid input. Please enter a valid option number.")
+
+
+    #######################################################################################
     double_newline()
     # Close the connection
     client.close()
