@@ -77,7 +77,7 @@ def show_menu():
     print("6. Graph time vs batteryPercentage and locationAccuracy")
     print("7. Graph time vs speed, batteryPercentage, and locationAccuracy")
     print("9. Find the oldest and newest location reports")
-    print("99. EXIT. Exit the program")
+    print("99. Go back to vehicle selection menu")
 
     double_newline()
     # Add more options as needed
@@ -173,26 +173,38 @@ def main():
     double_newline()
     placa_list = list(placa_counts.keys())
 
-    display_placas(placa_list)
+    ###########################################################################################
+    # Main interactive loop
+    while True:
+        double_newline()
+        print("Vehicle Selection Menu")
+        display_placas(placa_list)
+        double_newline()
 
-    double_newline()
+        # Get the user's selection
+        selected_placa = get_user_selection(placa_list)
 
-    # Get the user's selection
-    selected_placa = get_user_selection(placa_list)
-
-    show_menu()
-
-    try:
-        option = int(input("Enter option number: "))
-        if option == 1:
-            graph_time_vs_battery(selected_placa, location_data_list, start_date, end_date)
-        elif option == 99:
+        # Options menu loop
+        while True:
+            show_menu()
+            try:
+                option = int(input("Enter option number: "))
+                if option == 1:
+                    graph_time_vs_battery(selected_placa, location_data_list, start_date, end_date)
+                elif option == 99:
+                    print("Returning to vehicle selection menu ...")
+                    break  # Break the options menu loop
+                else:
+                    print("Option not implemented yet.")
+            except ValueError:
+                print("Invalid input. Please enter a valid option number.")
+        
+        # Check if the user wants to exit the program
+        exit_choice = input("Do you want to exit the program? (yes/no): ").strip().lower()
+        if exit_choice in {"yes", "y", "YES", "Y"}:
             print("Exiting the program ...")
-        else:
-            print("Option not implemented yet.")
-    except ValueError:
-        print("Invalid input. Please enter a valid option number.")
-
+            break  # Exit the main loop
+        double_newline()
 
     #######################################################################################
     double_newline()
