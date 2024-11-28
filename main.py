@@ -8,6 +8,7 @@ import os
 from urllib.parse import quote_plus
 from data.VehiculoPlusLocation import VehiculoPlusLocation
 import matplotlib.pyplot as plt
+import pickle
 
 # Load environment variables
 load_dotenv()
@@ -20,6 +21,24 @@ db_name = os.getenv("DB_NAME")
 encoded_password = quote_plus(db_password)
 
 uri = f"mongodb+srv://{db_user}:{encoded_password}@{db_server}/{db_name}?retryWrites=true&w=majority&appName=Cluster0"
+
+def create_export_filename(start_date: datetime, end_date: datetime) -> str:
+    #Generate a filename based on the selected date range
+    formatted_start = start_date.strftime("%Y-%m-%d_%H-%M-%S")
+    formatted_end = end_date.strftime("%Y-%m-%d_%H-%M-%S")
+    return f"local_exports/location_data_{formatted_start}_to_{formatted_end}.pkl"
+
+def save_to_pickle(location_data_list: list[VehiculoPlusLocation], file_path: str):
+    #save to a pickle file
+    os.makedirs(os.path.dirname(file_path), exist_ok=True) #Ensure the directory exists
+    with open(file_path, 'wb') as f:
+        pickle.dump(location_data_list, f)
+
+def load_from_pickle(file_path: str) -> list[VehiculoPlusLocation]:
+    #load from a pickle file
+    with open(file_path, 'rb') as f:
+        return pickle.load(f) 
+
 
 def double_newline():
     print("\n\t********************************************************")
@@ -190,6 +209,9 @@ def main():
 
     # Print the results
     #print_results(location_data_list)
+    # Save the location_data_list to a file
+    with open('local_exports.pkl', 'wb') as f:
+        pickle.dump(location_data_list, f)
 
     print("The size of the list is: ", len(location_data_list))
 
