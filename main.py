@@ -112,12 +112,12 @@ def graph_time_vs_battery(placa: str, data: list[dict], start_date: datetime, en
     # (You can use datetime parsing if your time format is a string)
 
     # Define a format for display (e.g., "Nov 25, 2024, 3:30 PM")
-    formatted_start = start_date.strftime("%b %d, %Y, %I:%M %p")
-    formatted_end = end_date.strftime("%b %d, %Y, %I:%M %p")
+    formatted_start = start_date.strftime("%A, %b %d, %Y, %I:%M %p")
+    formatted_end = end_date.strftime("%A, %b %d, %Y, %I:%M %p")
 
     plt.figure(figsize=(10, 6))
     plt.plot(times, battery_percentages, marker='o', color='b', label='Battery %')
-    plt.title(f'Time vs Battery Percentage for {placa} from {formatted_start} to {formatted_end}' )
+    plt.title(f'Time vs Battery Percentage for {placa}\n  from {formatted_start} to {formatted_end}' )
     plt.xlabel('Time')
     plt.ylabel('Battery Percentage')
     plt.xticks(rotation=45)
@@ -161,8 +161,8 @@ def main():
     #
     #
     #
-    start_date = datetime(2024, 11, 22, 17, 30, 0) # 2024-11-22 5:0:0 pm
-    end_date = datetime(2024, 11, 25, 8, 30, 0)
+    start_date = datetime(2024, 11, 25, 17, 30, 0) # 2024-11-22 5:0:0 pm
+    end_date = datetime(2024, 11, 27, 8, 30, 0)
     #
     #
     #
@@ -247,7 +247,6 @@ def main():
     for placa, count in placa_counts.most_common():
         print(f"Placa: {placa}, Count: {count}")
 
-    double_newline()
     placa_list = list(placa_counts.keys())
 
     ###########################################################################################
