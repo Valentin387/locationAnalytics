@@ -238,6 +238,39 @@ def graph_time_vs_speed_and_batteryPercentage(placa: str, data: list[dict], star
     plt.grid(True)
     plt.show()
 
+def graph_time_vs_speed_and_locationAccuracy(placa: str, data: list[dict], start_date: datetime, end_date: datetime):
+    filtered_data = [entry for entry in data if entry.vehiculo.placa == placa]
+    filtered_data.sort(key=lambda x: x.timeStamp)
+    times = [entry.timeStamp for entry in filtered_data]
+    speeds_mps = [entry.speed for entry in filtered_data]
+    location_accuracies = [entry.locationAccuracy for entry in filtered_data]
+
+    # Convert speeds from m/s to km/h
+    speeds_kmph = [speed * 3.6 for speed in speeds_mps]  # Conversion factor 3.6
+
+    # Define a format for display (e.g., "Nov 25, 2024, 3:30 PM")
+    formatted_start = start_date.strftime("%A, %b %d, %Y, %I:%M %p")
+    formatted_end = end_date.strftime("%A, %b %d, %Y, %I:%M %p")
+
+    fig, ax1 = plt.subplots(figsize=(10, 6))
+
+    color = 'tab:red'
+    ax1.set_xlabel('Time')
+    ax1.set_ylabel('Speed (km/h)', color=color)
+    ax1.plot(times, speeds_kmph, marker='o', color=color, label='Speed (km/h)')
+    ax1.tick_params(axis='y', labelcolor=color)
+
+    ax2 = ax1.twinx()
+    color = 'tab:blue'
+    ax2.set_ylabel('Location Accuracy', color=color)
+    ax2.plot(times, location_accuracies, marker='o', color=color, label='Location Accuracy')
+    ax2.tick_params(axis='y', labelcolor=color)
+
+    plt.title(f'Time vs Speed and Location Accuracy for {placa}\n  from {formatted_start} to {formatted_end}' )
+    fig.tight_layout()
+    plt.grid(True)
+    plt.show()
+
 def main():
     double_newline()
     print("\t\t WELCOME TO VEHICULO PLUS LOCATION DATA ANALYSIS \n")
@@ -361,6 +394,8 @@ def main():
                     graph_time_vs_locationAccuracy(selected_placa, location_data_list, start_date, end_date)
                 elif option == 4:
                     graph_time_vs_speed_and_batteryPercentage(selected_placa, location_data_list, start_date, end_date)
+                elif option == 5:
+                    graph_time_vs_speed_and_locationAccuracy(selected_placa, location_data_list, start_date, end_date)
                 elif option == 9:
                     get_oldest_and_newest_reports(selected_placa, location_data_list, start_date, end_date)
                 elif option == 99:
