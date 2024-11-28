@@ -209,9 +209,6 @@ def main():
 
     # Print the results
     #print_results(location_data_list)
-    # Save the location_data_list to a file
-    with open('local_exports.pkl', 'wb') as f:
-        pickle.dump(location_data_list, f)
 
     print("The size of the list is: ", len(location_data_list))
 
