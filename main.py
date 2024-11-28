@@ -154,6 +154,31 @@ def graph_time_vs_speed(placa: str, data: list[dict], start_date: datetime, end_
     plt.tight_layout()
     plt.show()
 
+#graph time vs locationAccuracy for a selected vehicle
+def graph_time_vs_locationAccuracy(placa: str, data: list[dict], start_date: datetime, end_date: datetime):
+    filtered_data = [entry for entry in data if entry.vehiculo.placa == placa]
+    filtered_data.sort(key=lambda x: x.timeStamp)
+    times = [entry.timeStamp for entry in filtered_data]
+    location_accuracies = [entry.locationAccuracy for entry in filtered_data]
+
+    # Convert timeStamp to datetime for plotting if needed
+    # (You can use datetime parsing if your time format is a string)
+
+    # Define a format for display (e.g., "Nov 25, 2024, 3:30 PM")
+    formatted_start = start_date.strftime("%A, %b %d, %Y, %I:%M %p")
+    formatted_end = end_date.strftime("%A, %b %d, %Y, %I:%M %p")
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(times, location_accuracies, marker='o', color='b', label='Location Accuracy')
+    plt.title(f'Time vs Location Accuracy for {placa}\n  from {formatted_start} to {formatted_end}' )
+    plt.xlabel('Time')
+    plt.ylabel('Location Accuracy')
+    plt.xticks(rotation=45)
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
 
 
 def get_oldest_and_newest_reports(placa: str, data: list[dict], start_date: datetime, end_date: datetime):
@@ -298,6 +323,8 @@ def main():
                     graph_time_vs_battery(selected_placa, location_data_list, start_date, end_date)
                 elif option == 2:
                     graph_time_vs_speed(selected_placa, location_data_list, start_date, end_date)
+                elif option == 3:
+                    graph_time_vs_locationAccuracy(selected_placa, location_data_list, start_date, end_date)
                 elif option == 9:
                     get_oldest_and_newest_reports(selected_placa, location_data_list, start_date, end_date)
                 elif option == 99:
