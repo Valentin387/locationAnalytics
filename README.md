@@ -29,13 +29,10 @@ Make sure to replace the placeholders with your actual MongoDB credentials. Also
 ### Step 2: Install Dependencies
 To install the required dependencies, run:
 
-```
+```bash
 pip install -r requirements.txt
 ```
 
-Here’s the explanation converted into Markdown syntax for your `README.md` file:
-
-```markdown
 ## Local Data Export and Retrieval
 
 ### Overview
@@ -44,9 +41,11 @@ The program now supports saving fetched data to local `.pickle` files for faster
 ### How It Works
 1. **Exported File Naming**:  
    After fetching documents from the database for a specific date range, the program stores the data in the `local_exports` folder. The file is named based on the selected date range using the format:  
-   ```
+
+   ```bash
    local_exports/<start_date>_to_<end_date>.pickle
-   ``
+   ```
+
 2. **Automatic Validation**:  
    Before querying the database, the program checks if a corresponding `.pickle` file already exists in the `local_exports` folder for the selected date range:
    - If the file exists, the program asks whether to use the local data or overwrite it with new data from the database.
@@ -76,4 +75,4 @@ project_root/
    - You will be prompted to choose whether to:
      - Use the saved file for faster access, or
      - Overwrite the file by re-fetching data from the database.
-```
+
