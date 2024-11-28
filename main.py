@@ -152,20 +152,10 @@ def get_oldest_and_newest_reports(placa: str, data: list[dict], start_date: date
 
 def main():
     double_newline()
-    print("\t\t WELCOME, connecting to the database, please wait ... \n")
+    print("\t\t WELCOME TO VEHICULO PLUS LOCATION DATA ANALYSIS \n")
 
-    # Create a new client and connect to the server
-    client = MongoClient(uri, server_api=ServerApi('1'))
-
-    # Ping the database
-    if not ping_database(client):
-        return  # Exit if the database cannot be reached
-
-    # Access the database (already specified in the connection URI)
-    db = client[db_name]
-
-    # Access the collection
-    collection = db['locations']
+    # List to hold the LocationData objects
+    location_data_list : list[VehiculoPlusLocation] = []
 
     ####################THE ONLY VARIABLE YOU HAVE TO INPUT IS THE START AND END DATE####################
     #
@@ -187,28 +177,63 @@ def main():
     # Print the formatted dates
     print(f"Start Date: {formatted_start}")
     print(f"End Date: {formatted_end}")
-    print("\nThe system will find all the vehicles that were active during this time period.")
-    double_newline()
+    print("")
 
-    print("\t\t Computing results, please wait ... \n\n")
+    print("\t\t Checking if a local export exists for the selected date range ... \n")
+    export_file = create_export_filename(start_date, end_date)
 
+    # Check if a local export exists inside the folder local_exports
+    if os.path.exists(export_file):
+        print(f"Local export found: {export_file}")
+        # print the size
+        print("Size of the file: ", os.path.getsize(export_file), "bytes")
+        print("Loading data from the local export ... \n")
+        location_data_list = load_from_pickle(export_file)
 
-    # Create the query
-    query = create_date_range_query(start_date, end_date)
+        print("\nThe system will find all the vehicles that were active during this time period.")
+        double_newline()
 
-    results = collection.find(query)
+        print("\t\t Computing results, please wait ... \n\n")
+    else:
+        print("Local export not found. Retrieving data from the database ... \n")
+        print("\t\t Connecting to the database, please wait ... \n")
 
-    # List to hold the LocationData objects
-    location_data_list : list[VehiculoPlusLocation] = []
+        # Create a new client and connect to the server
+        client = MongoClient(uri, server_api=ServerApi('1'))
 
-    # Convert each MongoDB document into a VehiculoPlusLocation object and append to the list
-    for document in results:
-        # Convert MongoDB document to VehiculoPlusLocation object
-        location_data = VehiculoPlusLocation(**document)
-        location_data_list.append(location_data)
+        # Ping the database
+        if not ping_database(client):
+            return  # Exit if the database cannot be reached
 
-    # Print the results
-    #print_results(location_data_list)
+        # Access the database (already specified in the connection URI)
+        db = client[db_name]
+
+        # Access the collection
+        collection = db['locations']
+
+        print("\nThe system will find all the vehicles that were active during this time period.")
+        double_newline()
+
+        print("\t\t Computing results, please wait ... \n\n")
+
+        # Create the query
+        query = create_date_range_query(start_date, end_date)
+
+        results = collection.find(query)
+
+        # Convert each MongoDB document into a VehiculoPlusLocation object and append to the list
+        for document in results:
+            # Convert MongoDB document to VehiculoPlusLocation object
+            location_data = VehiculoPlusLocation(**document)
+            location_data_list.append(location_data)
+        save_to_pickle(location_data_list, export_file)
+
+            # Close the connection
+        print("Closing the connection to the database ...")
+        client.close() #idk what is this
+
+        # Print the results
+        #print_results(location_data_list)
 
     print("The size of the list is: ", len(location_data_list))
 
@@ -262,9 +287,6 @@ def main():
 
     #######################################################################################
     double_newline()
-    # Close the connection
-    print("Closing the connection to the database ...")
-    client.close() #idk what is this
     print("END OF LINE")
 
 
