@@ -15,7 +15,7 @@ It is recommended to use a virtual environment to manage the project's dependenc
    ```bash
    python -m venv venv
 
-That will create a `.env` file in the root of the project. Then, add the following content:
+Then create a `.env` file in the root of the project. Then, add the following content:
 
 ```env
 DB_USER=your_database_user
