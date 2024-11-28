@@ -8,6 +8,7 @@ import os
 from urllib.parse import quote_plus
 from data.VehiculoPlusLocation import VehiculoPlusLocation
 import matplotlib.pyplot as plt
+import pickle
 
 # Load environment variables
 load_dotenv()
@@ -20,6 +21,24 @@ db_name = os.getenv("DB_NAME")
 encoded_password = quote_plus(db_password)
 
 uri = f"mongodb+srv://{db_user}:{encoded_password}@{db_server}/{db_name}?retryWrites=true&w=majority&appName=Cluster0"
+
+def create_export_filename(start_date: datetime, end_date: datetime) -> str:
+    #Generate a filename based on the selected date range
+    formatted_start = start_date.strftime("%Y-%m-%d_%H-%M-%S")
+    formatted_end = end_date.strftime("%Y-%m-%d_%H-%M-%S")
+    return f"local_exports/location_data_{formatted_start}_to_{formatted_end}.pkl"
+
+def save_to_pickle(location_data_list: list[VehiculoPlusLocation], file_path: str):
+    #save to a pickle file
+    os.makedirs(os.path.dirname(file_path), exist_ok=True) #Ensure the directory exists
+    with open(file_path, 'wb') as f:
+        pickle.dump(location_data_list, f)
+
+def load_from_pickle(file_path: str) -> list[VehiculoPlusLocation]:
+    #load from a pickle file
+    with open(file_path, 'rb') as f:
+        return pickle.load(f) 
+
 
 def double_newline():
     print("\n\t********************************************************")
@@ -77,7 +96,7 @@ def show_menu():
     print("6. Graph time vs batteryPercentage and locationAccuracy")
     print("7. Graph time vs speed, batteryPercentage, and locationAccuracy")
     print("9. Find the oldest and newest location reports")
-    print("99. EXIT. Exit the program")
+    print("99. Go back to vehicle selection menu")
 
     double_newline()
     # Add more options as needed
@@ -85,6 +104,7 @@ def show_menu():
     # Graph time vs batteryPercentage for a selected vehicle
 def graph_time_vs_battery(placa: str, data: list[dict], start_date: datetime, end_date: datetime):
     filtered_data = [entry for entry in data if entry.vehiculo.placa == placa]
+    filtered_data.sort(key=lambda x: x.timeStamp)
     times = [entry.timeStamp for entry in filtered_data]
     battery_percentages = [entry.batteryPercentage for entry in filtered_data]
 
@@ -92,12 +112,12 @@ def graph_time_vs_battery(placa: str, data: list[dict], start_date: datetime, en
     # (You can use datetime parsing if your time format is a string)
 
     # Define a format for display (e.g., "Nov 25, 2024, 3:30 PM")
-    formatted_start = start_date.strftime("%b %d, %Y, %I:%M %p")
-    formatted_end = end_date.strftime("%b %d, %Y, %I:%M %p")
+    formatted_start = start_date.strftime("%A, %b %d, %Y, %I:%M %p")
+    formatted_end = end_date.strftime("%A, %b %d, %Y, %I:%M %p")
 
     plt.figure(figsize=(10, 6))
     plt.plot(times, battery_percentages, marker='o', color='b', label='Battery %')
-    plt.title(f'Time vs Battery Percentage for {placa} from {formatted_start} to {formatted_end}' )
+    plt.title(f'Time vs Battery Percentage for {placa}\n  from {formatted_start} to {formatted_end}' )
     plt.xlabel('Time')
     plt.ylabel('Battery Percentage')
     plt.xticks(rotation=45)
@@ -106,56 +126,114 @@ def graph_time_vs_battery(placa: str, data: list[dict], start_date: datetime, en
     plt.tight_layout()
     plt.show()
 
+
+def get_oldest_and_newest_reports(placa: str, data: list[dict], start_date: datetime, end_date: datetime):
+    filtered_data = [entry for entry in data if entry.vehiculo.placa == placa]
+    filtered_data.sort(key=lambda x: x.timeStamp)
+    oldest_report = filtered_data[0].timeStamp
+    newest_report = filtered_data[-1].timeStamp
+
+    # Convert timeStamp to datetime for display if needed
+    # (You can use datetime parsing if your time format is a string)
+
+    # Define a format for display (e.g., "Nov 25, 2024, 3:30 PM")
+    formatted_start = start_date.strftime("%A, %b %d, %Y, %I:%M %p")
+    formatted_end = end_date.strftime("%A, %b %d, %Y, %I:%M %p")
+    formatted_oldest = oldest_report.strftime("%A, %b %d, %Y, %I:%M %p")
+    formatted_newest = newest_report.strftime("%A, %b %d, %Y, %I:%M %p")
+
+    print(f"Oldest report for {placa} from {formatted_start} to {formatted_end}:")
+    print(formatted_oldest)
+
+    print(f"Newest report for {placa} from {formatted_start} to {formatted_end}:")
+    print(formatted_newest)
+
+    # Add more analysis functions as needed
+
 def main():
     double_newline()
-    print("\t\t WELCOME, connecting to the database, please wait ... \n")
+    print("\t\t WELCOME TO VEHICULO PLUS LOCATION DATA ANALYSIS \n")
 
-    # Create a new client and connect to the server
-    client = MongoClient(uri, server_api=ServerApi('1'))
+    # List to hold the LocationData objects
+    location_data_list : list[VehiculoPlusLocation] = []
 
-    # Ping the database
-    if not ping_database(client):
-        return  # Exit if the database cannot be reached
+    ####################THE ONLY VARIABLE YOU HAVE TO INPUT IS THE START AND END DATE####################
+    #
+    #
+    #
+    start_date = datetime(2024, 11, 25, 17, 30, 0) # 2024-11-22 5:0:0 pm
+    end_date = datetime(2024, 11, 27, 8, 30, 0)
+    #
+    #
+    #
+    ####################THE ONLY VARIABLE YOU HAVE TO INPUT IS THE START AND END DATE####################
 
-    # Access the database (already specified in the connection URI)
-    db = client[db_name]
-
-    # Access the collection
-    collection = db['locations']
-
-    start_date = datetime(2024, 11, 22, 17, 30, 0) # 2024-11-22 5:0:0 pm
-    end_date = datetime(2024, 11, 25, 8, 30, 0)
     # Define a format for display (e.g., "Nov 25, 2024, 3:30 PM")
-    formatted_start = start_date.strftime("%b %d, %Y, %I:%M %p")
-    formatted_end = end_date.strftime("%b %d, %Y, %I:%M %p")
+    formatted_start = start_date.strftime("%A, %b %d, %Y, %I:%M %p")
+    formatted_end = end_date.strftime("%A, %b %d, %Y, %I:%M %p")
 
     print("The selected date range is: \n")
 
     # Print the formatted dates
     print(f"Start Date: {formatted_start}")
     print(f"End Date: {formatted_end}")
-    print("\nThe system will find all the vehicles that were active during this time period.")
-    double_newline()
+    print("")
 
-    print("\t\t Computing results, please wait ... \n\n")
+    print("\t\t Checking if a local export exists for the selected date range ... \n")
+    export_file = create_export_filename(start_date, end_date)
 
+    # Check if a local export exists inside the folder local_exports
+    if os.path.exists(export_file):
+        print(f"Local export found: {export_file}")
+        # print the size
+        print("Size of the file: ", os.path.getsize(export_file), "bytes")
+        print("Loading data from the local export ... \n")
+        location_data_list = load_from_pickle(export_file)
 
-    # Create the query
-    query = create_date_range_query(start_date, end_date)
+        print("\nThe system will find all the vehicles that were active during this time period.")
+        double_newline()
 
-    results = collection.find(query)
+        print("\t\t Computing results, please wait ... \n\n")
+    else:
+        print("Local export not found. Retrieving data from the database ... \n")
+        print("\t\t Connecting to the database, please wait ... \n")
 
-    # List to hold the LocationData objects
-    location_data_list : list[VehiculoPlusLocation] = []
+        # Create a new client and connect to the server
+        client = MongoClient(uri, server_api=ServerApi('1'))
 
-    # Convert each MongoDB document into a VehiculoPlusLocation object and append to the list
-    for document in results:
-        # Convert MongoDB document to VehiculoPlusLocation object
-        location_data = VehiculoPlusLocation(**document)
-        location_data_list.append(location_data)
+        # Ping the database
+        if not ping_database(client):
+            return  # Exit if the database cannot be reached
 
-    # Print the results
-    #print_results(location_data_list)
+        # Access the database (already specified in the connection URI)
+        db = client[db_name]
+
+        # Access the collection
+        collection = db['locations']
+
+        print("\nThe system will find all the vehicles that were active during this time period.")
+        double_newline()
+
+        print("\t\t Computing results, please wait ... \n\n")
+
+        # Create the query
+        query = create_date_range_query(start_date, end_date)
+
+        results = collection.find(query)
+
+        # Convert each MongoDB document into a VehiculoPlusLocation object and append to the list
+        for document in results:
+            # Convert MongoDB document to VehiculoPlusLocation object
+            location_data = VehiculoPlusLocation(**document)
+            location_data_list.append(location_data)
+        save_to_pickle(location_data_list, export_file)
+
+            # Close the connection
+        print("Closing the connection to the database ...")
+        client.close() #idk what is this
+
+        # Print the results
+        #print_results(location_data_list)
 
     print("The size of the list is: ", len(location_data_list))
 
@@ -169,35 +247,45 @@ def main():
     for placa, count in placa_counts.most_common():
         print(f"Placa: {placa}, Count: {count}")
 
-    double_newline()
     placa_list = list(placa_counts.keys())
 
-    display_placas(placa_list)
+    ###########################################################################################
+    # Main interactive loop
+    while True:
+        double_newline()
+        print("Vehicle Selection Menu")
+        display_placas(placa_list)
+        double_newline()
 
-    double_newline()
+        # Get the user's selection
+        selected_placa = get_user_selection(placa_list)
 
-    # Get the user's selection
-    selected_placa = get_user_selection(placa_list)
-
-    show_menu()
-
-    try:
-        option = int(input("Enter option number: "))
-        if option == 1:
-            graph_time_vs_battery(selected_placa, location_data_list, start_date, end_date)
-        elif option == 99:
+        # Options menu loop
+        while True:
+            show_menu()
+            try:
+                option = int(input("Enter option number: "))
+                if option == 1:
+                    graph_time_vs_battery(selected_placa, location_data_list, start_date, end_date)
+                elif option == 9:
+                    get_oldest_and_newest_reports(selected_placa, location_data_list, start_date, end_date)
+                elif option == 99:
+                    print("Returning to vehicle selection menu ...")
+                    break  # Break the options menu loop
+                else:
+                    print("Option not implemented yet.")
+            except ValueError:
+                print("Invalid input. Please enter a valid option number.")
+        
+        # Check if the user wants to exit the program
+        exit_choice = input("Do you want to exit the program? (yes/no): ").strip().lower()
+        if exit_choice in {"yes", "y", "YES", "Y"}:
             print("Exiting the program ...")
-        else:
-            print("Option not implemented yet.")
-    except ValueError:
-        print("Invalid input. Please enter a valid option number.")
-
+            break  # Exit the main loop
+        double_newline()
 
     #######################################################################################
     double_newline()
-    # Close the connection
-    print("Closing the connection to the database ...")
-    client.close()
     print("END OF LINE")
 
 
