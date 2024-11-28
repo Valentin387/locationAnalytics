@@ -119,9 +119,9 @@ def get_oldest_and_newest_reports(placa: str, data: list[dict], start_date: date
 
     # Define a format for display (e.g., "Nov 25, 2024, 3:30 PM")
     formatted_start = start_date.strftime("%A, %b %d, %Y, %I:%M %p")
-    formatted_end = end_date.strftime("%b %d, %Y, %I:%M %p")
-    formatted_oldest = oldest_report.strftime("%b %d, %Y, %I:%M %p")
-    formatted_newest = newest_report.strftime("%b %d, %Y, %I:%M %p")
+    formatted_end = end_date.strftime("%A, %b %d, %Y, %I:%M %p")
+    formatted_oldest = oldest_report.strftime("%A, %b %d, %Y, %I:%M %p")
+    formatted_newest = newest_report.strftime("%A, %b %d, %Y, %I:%M %p")
 
     print(f"Oldest report for {placa} from {formatted_start} to {formatted_end}:")
     print(formatted_oldest)
@@ -148,11 +148,20 @@ def main():
     # Access the collection
     collection = db['locations']
 
+    ####################THE ONLY VARIABLE YOU HAVE TO INPUT IS THE START AND END DATE####################
+    #
+    #
+    #
     start_date = datetime(2024, 11, 22, 17, 30, 0) # 2024-11-22 5:0:0 pm
     end_date = datetime(2024, 11, 25, 8, 30, 0)
+    #
+    #
+    #
+    ####################THE ONLY VARIABLE YOU HAVE TO INPUT IS THE START AND END DATE####################
+
     # Define a format for display (e.g., "Nov 25, 2024, 3:30 PM")
-    formatted_start = start_date.strftime("%b %d, %Y, %I:%M %p")
-    formatted_end = end_date.strftime("%b %d, %Y, %I:%M %p")
+    formatted_start = start_date.strftime("%A, %b %d, %Y, %I:%M %p")
+    formatted_end = end_date.strftime("%A, %b %d, %Y, %I:%M %p")
 
     print("The selected date range is: \n")
 
