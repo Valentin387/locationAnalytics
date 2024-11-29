@@ -3,6 +3,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from collections import Counter
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 import os
 from urllib.parse import quote_plus
@@ -12,6 +13,11 @@ import pickle
 
 # Load environment variables
 load_dotenv()
+
+UTC = ZoneInfo("UTC")  # Define UTC timezone
+
+# Use a valid IANA timezone name for UTC-5
+LOCAL_TIMEZONE = ZoneInfo("America/Bogota")
 
 # Access variables from .env
 db_user = os.getenv("DB_USER")
@@ -356,8 +362,8 @@ def main():
     #
     #
     #
-    start_date = datetime(2024, 11, 25, 17, 30, 0) # 2024-11-22 5:0:0 pm
-    end_date = datetime(2024, 11, 27, 8, 30, 0)
+    start_date = datetime(2024, 11, 29, 8, 0, 0, tzinfo=LOCAL_TIMEZONE) # 2024-11-22 5:0:0 pm
+    end_date = datetime(2024, 11, 29, 9, 0, 0, tzinfo=LOCAL_TIMEZONE)
     #
     #
     #
@@ -420,6 +426,10 @@ def main():
         for document in results:
             # Convert MongoDB document to VehiculoPlusLocation object
             location_data = VehiculoPlusLocation(**document)
+            location_data.timeStamp = location_data.timeStamp.replace(tzinfo=UTC)
+            location_data.timeStamp = location_data.timeStamp.astimezone(LOCAL_TIMEZONE)
+            location_data.timeStampServer = location_data.timeStampServer.replace(tzinfo=UTC)
+            location_data.timeStampServer = location_data.timeStampServer.astimezone(LOCAL_TIMEZONE)
             location_data_list.append(location_data)
         save_to_pickle(location_data_list, export_file)
 
