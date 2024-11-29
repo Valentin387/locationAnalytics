@@ -362,8 +362,8 @@ def main():
     #
     #
     #
-    start_date = datetime(2024, 11, 29, 8, 0, 0, tzinfo=LOCAL_TIMEZONE) # 2024-11-22 5:0:0 pm
-    end_date = datetime(2024, 11, 29, 9, 0, 0, tzinfo=LOCAL_TIMEZONE)
+    start_date = datetime(2024, 11, 29, 1, 0, 0, tzinfo=LOCAL_TIMEZONE) # 2024-11-22 5:0:0 pm
+    end_date = datetime(2024, 11, 29, 16, 0, 0, tzinfo=LOCAL_TIMEZONE)
     #
     #
     #
@@ -424,6 +424,11 @@ def main():
 
         # Convert each MongoDB document into a VehiculoPlusLocation object and append to the list
         for document in results:
+            # Check for hardcoded values and replace them with 0.0
+            document["latitud"] = 0.0 if document.get("latitud") in ["lat", "LAT"] else float(document["latitud"])
+            document["longitud"] = 0.0 if document.get("longitud") in ["lat", "LON"] else float(document["longitud"])
+            document["speed"] = 0.0 if document.get("speed") in ["speed", "SPEED"] else float(document["speed"])
+            document["accuracy"] = 0.0 if document.get("accuracy") in ["accuracy", "ACCURACY"] else float(document["accuracy"])
             # Convert MongoDB document to VehiculoPlusLocation object
             location_data = VehiculoPlusLocation(**document)
             location_data.timeStamp = location_data.timeStamp.replace(tzinfo=UTC)
