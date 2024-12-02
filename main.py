@@ -424,11 +424,6 @@ def main():
 
         # Convert each MongoDB document into a VehiculoPlusLocation object and append to the list
         for document in results:
-            # Check for hardcoded values and replace them with 0.0
-            document["latitud"] = 0.0 if document.get("latitud") in ["lat", "LAT"] else float(document["latitud"])
-            document["longitud"] = 0.0 if document.get("longitud") in ["lat", "LON"] else float(document["longitud"])
-            document["speed"] = 0.0 if document.get("speed") in ["speed", "SPEED"] else float(document["speed"])
-            document["accuracy"] = 0.0 if document.get("accuracy") in ["accuracy", "ACCURACY"] else float(document["accuracy"])
             # Convert MongoDB document to VehiculoPlusLocation object
             location_data = VehiculoPlusLocation(**document)
             location_data.timeStamp = location_data.timeStamp.replace(tzinfo=UTC)
